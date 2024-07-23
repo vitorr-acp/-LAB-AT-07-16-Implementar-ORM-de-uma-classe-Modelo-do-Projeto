@@ -1,0 +1,76 @@
+import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.dao.Dao;
+import java.sql.SQLException;
+import com.j256.ormlite.table.TableUtils;
+import java.util.List;
+import java.util.ArrayList;
+
+public class ConsumidorRepository
+{
+    private static Database database;
+    private static Dao<Consumidor, Integer> dao;
+    private List<Consumidor> loadedConsumidores;
+    private Consumidor loadedConsumidor; 
+    
+    public ConsumidorRepository(Database database) {
+        ConsumidorRepository.setDatabase(database);
+        loadedConsumidores = new ArrayList<Consumidor>();
+    }
+    
+    public static void setDatabase(Database database) {
+        ConsumidorRepository.database = database;
+        try {
+            dao = DaoManager.createDao(database.getConnection(), Consumidor.class);
+            TableUtils.createTableIfNotExists(database.getConnection(), Consumidor.class);
+        }
+        catch(SQLException e) {
+            System.out.println(e);
+        }            
+    }
+    
+    public Consumidor create(Consumidor consumidor) {
+        int nrows = 0;
+        try {
+            nrows = dao.create(consumidor);
+            if ( nrows == 0 )
+                throw new SQLException("Error: object not saved");
+            this.loadedConsumidor = consumidor;
+            loadedConsumidores.add(consumidor);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return consumidor;
+    }    
+
+    public void update(Consumidor consumidor) {
+      // TODO
+    }
+
+    public void delete(Consumidor consumidor) {
+      // TODO
+    }
+    
+    public Consumidor loadFromId(int id) {
+        try {
+            this.loadedConsumidor = dao.queryForId(id);
+            if (this.loadedConsumidor != null)
+                this.loadedConsumidores.add(this.loadedConsumidor);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return this.loadedConsumidor;
+    }    
+    
+    public List<Consumidor> loadAll() {
+        try {
+            this.loadedConsumidores =  dao.queryForAll();
+            if (this.loadedConsumidores.size() != 0)
+                this.loadedConsumidor = this.loadedConsumidores.get(0);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return this.loadedConsumidores;
+    }
+
+    // getters and setters omitted...        
+}
